@@ -62,6 +62,8 @@ pub fn standardize(stream: &TokenStream) -> anyhow::Result<TokenStream> {
     let mut res = TokenStream::new();
 
     let mut stream = stream.iter();
+    let mut cnt_paren = 0;
+
     let Some(mut this) = stream.next() else {
         return Ok(res);
     };
@@ -74,6 +76,9 @@ pub fn standardize(stream: &TokenStream) -> anyhow::Result<TokenStream> {
             res.push(*this)
         }
     }
+    if *this == LP {
+        cnt_paren += 1;
+    }
 
     for token in stream {
         match next_rule(this, &token) {
@@ -85,6 +90,15 @@ pub fn standardize(stream: &TokenStream) -> anyhow::Result<TokenStream> {
             }
         }
         this = token;
+        if *this == LP {
+            cnt_paren += 1;
+        } else if *this == RP {
+            cnt_paren -= 1;
+        }
+    }
+
+    if cnt_paren > 0 {
+        anyhow::bail!("Invalid expression")
     }
 
     Ok(res)
@@ -98,22 +112,40 @@ mod tests {
 
     #[test]
     fn test_standardize() {
-        // -1+(-1-1)
-        let input = vec![Sub, Number(1), Add, LP, Sub, Number(1), Sub, Number(1), RP];
-        // 0-1+(0-1-1)
-        let expected = vec![
-            Number(0),
-            Sub,
-            Number(1),
-            Add,
-            LP,
-            Number(0),
-            Sub,
-            Number(1),
-            Sub,
-            Number(1),
-            RP,
-        ];
-        assert_eq!(standardize(&input).unwrap(), expected);
+        assert_eq!(
+            // -1+(-1-1)
+            standardize(&vec![
+                Sub,
+                Number(1),
+                Add,
+                LP,
+                Sub,
+                Number(1),
+                Sub,
+                Number(1),
+                RP
+            ])
+            .unwrap(),
+            // 0-1+(0-1-1)
+            vec![
+                Number(0),
+                Sub,
+                Number(1),
+                Add,
+                LP,
+                Number(0),
+                Sub,
+                Number(1),
+                Sub,
+                Number(1),
+                RP,
+            ]
+        );
+    }
+
+    #[test]
+    fn test_invalid_expression() {
+        // ((1+1)
+        assert!(standardize(&vec![LP, LP, Number(1), Add, Number(1), RP]).is_err());
     }
 }
