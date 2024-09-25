@@ -3,6 +3,7 @@ use std::env;
 mod compute;
 mod eval;
 mod token;
+mod transform;
 use compute::compute;
 
 fn main() -> anyhow::Result<()> {

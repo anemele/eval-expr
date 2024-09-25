@@ -1,6 +1,6 @@
 pub type NumType = i64;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     Number(NumType),
     Add,
