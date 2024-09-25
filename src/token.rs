@@ -15,6 +15,8 @@ pub type TokenStream = Vec<Token>;
 /// valid character set
 /// 0123456789+-*/()
 pub fn tokenize(expr: &str) -> anyhow::Result<TokenStream> {
+    use Token::*;
+
     let mut res = vec![];
     let mut tmp = String::new();
 
@@ -24,22 +26,22 @@ pub fn tokenize(expr: &str) -> anyhow::Result<TokenStream> {
             continue;
         }
         if !tmp.is_empty() {
-            res.push(Token::Number(tmp.parse::<NumType>()?));
+            res.push(Number(tmp.parse::<NumType>()?));
             tmp.clear();
         }
         let token = match c {
-            '+' => Token::Add,
-            '-' => Token::Sub,
-            '*' => Token::Mul,
-            '/' => Token::Div,
-            '(' => Token::LP,
-            ')' => Token::RP,
+            '+' => Add,
+            '-' => Sub,
+            '*' => Mul,
+            '/' => Div,
+            '(' => LP,
+            ')' => RP,
             _ => continue,
         };
         res.push(token);
     }
     if !tmp.is_empty() {
-        res.push(Token::Number(tmp.parse::<NumType>()?));
+        res.push(Number(tmp.parse::<NumType>()?));
         tmp.clear();
     }
 
