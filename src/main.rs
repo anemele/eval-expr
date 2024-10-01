@@ -12,10 +12,9 @@ fn main() -> anyhow::Result<()> {
         anyhow::bail!("requires at least one argument");
     }
     for s in &args[1..] {
-        if let Ok(v) = compute(&s) {
-            println!("{s} = {v}");
-        } else {
-            println!("invalid expression: {s}")
+        match compute(&s) {
+            Ok(v) => println!("{s} = {v}"),
+            Err(e) => println!("Error: {e}"),
         }
     }
     Ok(())

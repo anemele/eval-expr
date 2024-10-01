@@ -10,7 +10,13 @@ fn operate(opd: &mut Vec<NumType>, opr: &Token) -> anyhow::Result<()> {
         Add => a + b,
         Sub => a - b,
         Mul => a * b,
-        Div => a / b,
+        Div => {
+            if b == 0 {
+                anyhow::bail!("division by zero")
+            } else {
+                a / b
+            }
+        }
         _ => anyhow::bail!("never go here!"),
     };
     opd.push(c);
